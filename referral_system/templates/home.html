@@ -1,0 +1,228 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <title>Document</title>
+</head>
+<body>
+    
+    {%if user.is_authenticated%}
+    <div class="container"
+        style="display: flex;
+        min-width: 100%;
+        flex-wrap: wrap;
+        flex-direction: row;">
+        <div id = "user-info" class="start-0 position-absolute" style="font-size: x-large;margin-top: 47px;
+        margin-left: 47px;">
+            <h4>{{user.phone_number}}</h4>
+        <label for="ref-code">Referral code:</label>
+        <p id="ref-code">{{user.referral_code}}</p>
+        <label for="last-login">Last login:</label>
+        <p id="last-login">{{user.last_login}}</p>
+        </div>
+        <div id="list_of_reff" class="position-absolute" 
+        style="margin-top: 57px;
+    width: 554px;
+    margin-left: 376px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: xx-large;
+    height: 864px;
+    overflow: auto;">
+            <h4>Entered your invite:</h4>
+            {% for user in invite_list %}
+            <p>
+            {{user.phone_number}}
+            </p>
+            {%endfor%}
+        </div>
+        <div id="makeinvite" class="end-0 position-absolute" 
+        style="margin-top: 51px;
+        font-size: x-large;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-right: 46px;">
+        {%if user.used_referral_code%}
+            
+            <div id="list-ref" style="font-size: x-large;">
+                You have already entered the code: {{user.used_referral_code}}
+            </div>
+        {%else%}
+            <form method="post" id="invite_send_profile">
+                {%csrf_token%}
+                <label for="invite-input">Enter invite:</label>
+                <input name="referral-code" required type="text" id="invite-input" style="font-size: x-large;">
+                <button type="submit" id="send-invite-from-profile">Отправить</button>
+            </form>
+            <div id="my-invite" style="font-size: x-large;">
+                
+            </div>
+        {%endif%}
+        </div>
+    </div>
+    {%else%}
+
+<div
+    style="width: 100%; height: 100%;"
+    >
+    <div
+    style="
+    position: relative;
+    left: 42%;
+   margin-top: 19%;">
+    <Button type="button" class="btn btn-primary" 
+    data-bs-toggle="modal" data-bs-target="#PhoneModal"
+    id="auth-btn"
+    style="height: 200px;
+    width: 302px;
+    font-size: xxx-large;
+    border-radius: 38px;
+    background-color: plum;
+    border-width: 9px;
+    cursor: pointer;"
+    
+    >Auth</Button>
+    </div>
+</div>
+{%endif%}
+
+  
+  <!-- Modal -->
+  <div class="modal fade" id="PhoneModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Enter phone number</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        <div id="errors-phone"></div>
+        <form id="phone-form">
+            {% csrf_token %}
+            <input type="text" id="phone_number" name="phone_number" maxlength="15" required>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" id="phone-submit" class="btn btn-primary">Sand code</button>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="CodeModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Enter code</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        <div id="errors-code"></div>
+        <form action="" id="code-form">
+            {% csrf_token %}
+            <input type="text" name="auth_code">
+            <input type="hidden" name="phone" id="phone-for-code">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Sand code</button>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
+
+<script>
+    $(document).ready(function(){
+        console.log('NOOo')
+        $('#invite_send_profile').submit(function(event){
+            var InviteDataForm = $('#invite_send_profile').serialize()
+            console.log('NOO')
+            event.preventDefault()
+            $.ajax({
+                type:'POST',
+                url:"{%url 'send_invite'%}",
+                data:InviteDataForm,
+                success: function(response){
+                    if(response.success){
+                        window.location.href = '{%url "home"%}';
+                    }else{
+                        console.log('NOO')
+                        $("#my-invite").text('Code not found')
+                    }
+                }
+            });
+        });
+    });
+
+
+    $(document).ready(function() {
+        $("#phone_number").on('input',function(){
+            var input = $(this).val();
+    
+    if (/^\d{1,15}$/.test(input)) {
+      $('#phone-submit').prop('disabled', false); 
+    } else {
+      $('#phone-submit').prop('disabled', true); 
+    }})
+        $('#auth-btn').click(function() {
+            $('#PhoneModal').modal('show');
+        });
+        $('#phone-form').submit(function(event) {
+            event.preventDefault()
+            var submitButton = $('#phone-submit');
+            var formPhoneData = $("#phone-form").serialize();
+
+            // AJAX запрос на сервер для отправки номера телефона
+            $.ajax({
+                type: 'POST',
+                url: '{%url "send_phone"%}',
+                data:formPhoneData,
+                success: function(response) {
+                    if(response.success){
+                    $('#PhoneModal').modal('hide');
+                    $('#CodeModal').modal('show');
+                    alert(response.message)
+                    $('#phone-for-code').val(response.phone)
+                }
+                    else {
+                    const errorPhone = document.getElementById('errors-phone')
+                    $('#errors-phone').html("Ошибка: " + xhr.responseText);
+                    }
+                }
+            });
+        });
+
+        // При отправке кода авторизации
+        $('#code-form').submit(function(event) {
+            event.preventDefault();
+            var formCodeData = $('#code-form').serialize();
+            
+            // AJAX запрос на сервер для отправки кода авторизации
+            $.ajax({
+                type: 'POST',
+                url: '{%url "auth_code"%}',
+                data:formCodeData,
+                success: function(response) {
+                    if (response.success){
+                    window.location.href = '{%url "home"%}';}
+                    else{
+                        $("#errors-code").html(response.message)
+                    }
+                }
+            });
+        });
+    });
+</script>
