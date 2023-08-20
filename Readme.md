@@ -21,13 +21,14 @@
     "phone_number": "89132561873",
     
 }
+```
 
 Ответ:
 ```json
 {
     "message":"Authorization code: {auth_code}"
 }
-
+```
 Ошибка:
 ```json
 {
@@ -50,13 +51,13 @@
     "phone_number":"89132561873",
     "auth_code": "1234",
 }
-
+```
 Ответ:
 ```json
 {
     "message":"Code verified"
 }
-
+```
 Ошибка:
 ```json
 {
@@ -98,13 +99,13 @@
 {
     "referral_code": "r2d211",
 }
-
+```
 Ответ:
 ```json
 {
     "message":"Invitation code activated"
 }
-
+```
 Ошибки:
 ```json
 {
